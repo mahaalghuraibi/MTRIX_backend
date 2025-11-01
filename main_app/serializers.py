@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Ticket, WorkLog , Reaction 
+from .models import Ticket, WorkLog , Reaction , Profile
+from django.contrib.auth import get_user_model ######
 
 #-----------------------------------------------------------------------------------------
 # Ticket 
@@ -21,3 +22,17 @@ class ReactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reaction
         fields = '__all__'
+
+#-----------------------------------------------------------------------------------------
+# Profile
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = '__all__'
+
+class UserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(read_only=True)
+
+    class Meta:
+        model = get_user_model()
+        fields = ['id', 'username', 'email', 'profile']
