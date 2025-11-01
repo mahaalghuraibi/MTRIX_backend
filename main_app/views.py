@@ -9,14 +9,14 @@ from .serializers import ReactionSerializer
 
 
 #-----------------------------------------------------------------------------------------
-
+# Home
 class Home(APIView):
     def get(self, request):
         content = {'message': 'Welcome to the MTRIX API home route!'}
         return Response(content)
 
 #-----------------------------------------------------------------------------------------
-
+# Tickets
 class Tickets(APIView):
     serializer_class = TicketSerializer
 
@@ -39,7 +39,7 @@ class Tickets(APIView):
             return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 #-----------------------------------------------------------------------------------------
-
+# TicketDetail
 class TicketDetail(APIView):
     serializer_class = TicketSerializer
     lookup_field = 'id'
@@ -73,7 +73,7 @@ class TicketDetail(APIView):
 
 
 #-----------------------------------------------------------------------------------------
-
+# WorkLogs
 class WorkLogsIndex(APIView):
     serializer_class = WorkLogSerializer
 
@@ -105,7 +105,7 @@ class WorkLogsIndex(APIView):
 
 
 #-----------------------------------------------------------------------------------------
-
+# Reactions
 class ReactionsIndex(APIView):
     serializer_class = ReactionSerializer
 
