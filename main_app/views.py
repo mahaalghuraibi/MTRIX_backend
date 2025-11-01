@@ -6,7 +6,8 @@ from .models import Ticket , WorkLog
 from .serializers import TicketSerializer , WorkLogSerializer
 from .models import Ticket, Reaction
 from .serializers import ReactionSerializer
-
+from .models import Profile
+from .serializers import ProfileSerializer, UserSerializer
 
 #-----------------------------------------------------------------------------------------
 # Home
@@ -129,3 +130,33 @@ class ReactionsIndex(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as err:
             return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#-----------------------------------------------------------------------------------------
+# Profile
+class ProfileDetail(APIView):
+    serializer_class = ProfileSerializer  
+
+    def post(self, request, user_id):
+        try:
+            data = request.data.copy()
+            data["user"] = int(user_id)
+
+            user = get_object_or_404(User, id=user_id)
+
+
+            serializer = self.serializer_class(data=data)
+            if serializer.is_valid():
+                Profile.objects.update_or_create(
+                    user=user,
+                    defaults=serializer.validated_data
+                )
+
+                return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as err:
+            return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+            
