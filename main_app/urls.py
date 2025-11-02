@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import Home, Tickets , TicketDetail , WorkLogsIndex , ReactionsIndex , ProfileDetail
+from .views import Home, Tickets , TicketDetail , WorkLogsIndex , ReactionsIndex , ProfileDetail , CreateUserView
 
 #-----------------------------------------------------------------------------------------
 urlpatterns = [
@@ -9,5 +9,6 @@ urlpatterns = [
     path('tickets/<int:ticket_id>/worklogs/', WorkLogsIndex.as_view(), name='worklog-index'),
     path('tickets/<int:ticket_id>/reactions/', ReactionsIndex.as_view(), name='reaction-index'),
     path('users/<int:user_id>/profile/', ProfileDetail.as_view(), name='profile-detail'),
+    path('users/signup/', CreateUserView.as_view(), name='signup'),
 
 ]
