@@ -217,6 +217,8 @@ class VerifyUserView(APIView):
     def get(self, request):
         try:
             user = User.objects.get(username=request.user.username)
+            print("refresh token!!!")
+
             try:
                 refresh = RefreshToken.for_user(user)
                 return Response({
