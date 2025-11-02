@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 #-----------------------------------------------------------------------------------------
 # Ticket 
 class TicketSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta: #cy
         model = Ticket
         #fields = '__all__'

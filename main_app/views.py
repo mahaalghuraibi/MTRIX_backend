@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from django.shortcuts import get_object_or_404   
 from .models import Ticket , WorkLog
 from .serializers import TicketSerializer , WorkLogSerializer
@@ -10,6 +10,7 @@ from .models import Profile
 from .serializers import ProfileSerializer, UserSerializer
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
 
 #-----------------------------------------------------------------------------------------
 # Home
@@ -21,11 +22,12 @@ class Home(APIView):
 #-----------------------------------------------------------------------------------------
 # Tickets
 class Tickets(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = TicketSerializer
 
     def get(self, request):
         try:
-            tickets = Ticket.objects.all()
+            tickets = Ticket.objects.filter(user=request.user)
             serializer = self.serializer_class(tickets, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as err:
@@ -33,9 +35,9 @@ class Tickets(APIView):
 
     def post(self, request, *args, **kwargs):
         try:
-            serializer = self.serializer_class(data=request.data)
+            serializer = self.serializer_class(data=request.data, context={'request': request})
             if serializer.is_valid():
-                serializer.save()
+                serializer.save(user_id=request.user.id)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as err:
@@ -44,6 +46,7 @@ class Tickets(APIView):
 #-----------------------------------------------------------------------------------------
 # TicketDetail
 class TicketDetail(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = TicketSerializer
     lookup_field = 'id'
 
@@ -78,6 +81,7 @@ class TicketDetail(APIView):
 #-----------------------------------------------------------------------------------------
 # WorkLogs
 class WorkLogsIndex(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = WorkLogSerializer
 
     def get(self, request, ticket_id):
@@ -110,6 +114,7 @@ class WorkLogsIndex(APIView):
 #-----------------------------------------------------------------------------------------
 # Reactions
 class ReactionsIndex(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = ReactionSerializer
 
     def get(self, request, ticket_id):
@@ -136,6 +141,7 @@ class ReactionsIndex(APIView):
 #-----------------------------------------------------------------------------------------
 # Profile
 class ProfileDetail(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = ProfileSerializer  
 
     def post(self, request, user_id):
@@ -181,4 +187,51 @@ class CreateUserView(generics.CreateAPIView):
         except Exception as err:
             return Response({"error": str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            
+#-----------------------------------------------------------------------------------------
+# User 
+class LoginView(APIView):
+    def post(self, request):
+        try:
+            username = request.data.get('username')
+            password = request.data.get('password')
+
+            user = authenticate(username=username, password=password)
+            if user:
+                refresh = RefreshToken.for_user(user)
+                content = {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    'user': UserSerializer(user).data
+                }
+                return Response(content, status=status.HTTP_200_OK)
+
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as err:
+            return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)           
+
+#-----------------------------------------------------------------------------------------
+# User Verification / Token Refresh
+class VerifyUserView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user = User.objects.get(username=request.user.username)
+            try:
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    'user': UserSerializer(user).data
+                }, status=status.HTTP_200_OK)
+            except Exception as token_error:
+                return Response(
+                    {"detail": "Failed to generate token.", "error": str(token_error)},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        except Exception as err:
+            return Response(
+                {"detail": "Unexpected error occurred.", "error": str(err)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+ 
