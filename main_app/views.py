@@ -7,7 +7,7 @@ from .serializers import TicketSerializer , WorkLogSerializer
 from .models import Ticket, Reaction
 from .serializers import ReactionSerializer
 from .models import Profile
-from .serializers import ProfileSerializer, UserSerializer
+from .serializers import ProfileSerializer, UserSerializer, RegisterUserSerializer
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
@@ -165,12 +165,35 @@ class ProfileDetail(APIView):
 
         except Exception as err:
             return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#-----------------------------------------------------------------------------------------
+class UpdateProfile(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProfileSerializer
+
+    def put(self, request):
+        try:
+            profile, created = Profile.objects.get_or_create(user=request.user)
+
+            # نسمح بتعديل حقل واحد فقط: role
+            new_role = request.data.get('type')
+            if new_role is None:
+                return Response({'type': ['This field is required.']}, status=status.HTTP_400_BAD_REQUEST)
+
+            serializer = self.serializer_class(profile, data={'role': new_role}, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                # نرجع بيانات المستخدم الكاملة بعد التحديث
+                return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as err:
+            return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 #-----------------------------------------------------------------------------------------
 # User Signup 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = RegisterUserSerializer # غيرت الاسم وفي الامبورت 
 
     def create(self, request, *args, **kwargs):
         try:

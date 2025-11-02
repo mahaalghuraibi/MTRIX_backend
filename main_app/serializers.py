@@ -40,8 +40,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 #-----------------------------------------------------------------------------------------
 # user 
-
-class UserSerializer(serializers.ModelSerializer):
+# غير اسم الكلاس لانه زي بعض 
+class RegisterUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
