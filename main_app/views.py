@@ -151,7 +151,7 @@ class Reactions(APIView):
             return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 #-----------------------------------------------------------------------------------------
-# ReactionsIndex (for specific ticket)
+# ReactionsIndex 
 class ReactionsIndex(APIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ReactionSerializer
