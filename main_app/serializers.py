@@ -1,14 +1,14 @@
 from rest_framework import serializers
 from .models import Ticket, WorkLog , Reaction , Profile
-from django.contrib.auth import get_user_model ######
+from django.contrib.auth import get_user_model 
 from django.contrib.auth.models import User 
 #-----------------------------------------------------------------------------------------
 # Ticket 
 class TicketSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True) 
 
-    class Meta: #cy
+    class Meta: 
         model = Ticket
-        #fields = '__all__'
         exclude = ['created_at']
 
 #-----------------------------------------------------------------------------------------
@@ -40,7 +40,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 #-----------------------------------------------------------------------------------------
 # user 
-# غير اسم الكلاس لانه زي بعض 
 class RegisterUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
