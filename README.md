@@ -171,7 +171,7 @@ All endpoints require JWT authentication unless otherwise specified. Include the
    # Copy from example or create with the following variables:
    # SECRET_KEY=your-secret-key-here
    # SQL_ENGINE=django.db.backends.postgresql
-   # SQL_DATABASE=cats_django_dev
+   # SQL_DATABASE=MTRIX_django_dev
    # SQL_USER=docker_django_user
    # SQL_PASSWORD=hello_django
    # SQL_HOST=db
